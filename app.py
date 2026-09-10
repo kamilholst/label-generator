@@ -5,7 +5,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.graphics.barcode import code128
-from PIL import Image
+from reportlab.lib.utils import ImageReader
 
 # Browser tab and page layout configuration
 st.set_page_config(page_title="Warehouse Label Generator", page_icon="🏷️", layout="centered")
@@ -86,8 +86,9 @@ def generuj_pdf_w_pamieci(kody, logo_bytes=None):
         # Render the company logo on the left side (if uploaded)
         if logo_bytes:
             logo_x_pos = barcode_x_pos - logo_size - 5 * mm
-            logo_img = Image.open(io.BytesIO(logo_bytes))
-            c.drawImage(logo_img, logo_x_pos, y_barcode, width=logo_size, height=logo_size, mask='auto')
+            # Using ImageReader safely bypasses the internal ReportLab splitext filesystem check
+            logo_img_reader = ImageReader(io.BytesIO(logo_bytes))
+            c.drawImage(logo_img_reader, logo_x_pos, y_barcode, width=logo_size, height=logo_size, mask='auto')
         
         # Render the large human-readable text label centered below the barcode
         c.setFont("Helvetica-Bold", 38)
@@ -180,3 +181,4 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
